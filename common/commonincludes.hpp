@@ -27,6 +27,7 @@
 #endif
 
 // standard system includes
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -47,6 +48,24 @@
 #include <stdarg.h>
 #include <math.h>
 #include <sys/termios.h>
+#else
+
+#include <winsock2.h>
+#include <WS2tcpip.h>
+#include <string.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <stdarg.h>
+#include <math.h>
+#include <stdint.h>
+
+
+
+#endif
+
+
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
@@ -63,10 +82,10 @@
 #include <sys/epoll.h>
 #endif
 
+#ifndef WIN32
 #include <poll.h>
-
-
 #include <pthread.h>
+#endif
 
 
 #if !defined(DEBUG) && !defined(NDEBUG)
@@ -111,7 +130,9 @@ You_Didnt_Define_DEBUG_Or_NDEBUG g_compilererror[-1];
 #define VERIFY(expr) BOOST_VERIFY(expr)
 #define ASSERTMSG(expr, msg) BOOST_ASSERT_MSG (expr, msg)
 
+#ifndef ARRAYSIZE
 #define ARRAYSIZE(arr) (sizeof(arr)/sizeof(*arr))
+#endif
 
 inline void cta_noop(const char* psz)
 {

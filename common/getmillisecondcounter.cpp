@@ -18,7 +18,7 @@
 #include "commonincludes.hpp"
 #include "oshelper.h"
 
-
+#ifndef WIN32
 static uint32_t GetMillisecondCounterUnix()
 {
     uint64_t milliseconds = 0;
@@ -29,10 +29,11 @@ static uint32_t GetMillisecondCounterUnix()
     retvalue = (uint32_t)(milliseconds & (unsigned long long)0xffffffff);
     return retvalue;
 }
+#endif
 
 uint32_t GetMillisecondCounter()
 {
-#ifdef _WIN32
+#ifdef WIN32
     return GetTickCount();
 #else
     return GetMillisecondCounterUnix();    

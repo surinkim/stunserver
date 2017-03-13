@@ -60,15 +60,24 @@ int AtomicDecrement(int* pInt)
 
 int AtomicIncrement(int* pInt)
 {
+#ifndef WIN32
+
     COMPILE_TIME_ASSERT(sizeof(int)==4);
     // InterlockedIncrement
     return __sync_add_and_fetch(pInt, 1);
+#else
+    return (int)InterlockedIncrement((long*)pInt);
+#endif
 }
 
 int AtomicDecrement(int* pInt)
 {
+#ifndef WIN32
     // InterlockedDecrement
     return __sync_sub_and_fetch(pInt, 1);
+#else
+    return (int)InterlockedDecrement((long*)pInt);
+#endif
 }
 
 #endif

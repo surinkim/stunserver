@@ -19,28 +19,33 @@
 
 
 // HRESULT
+#ifndef WIN32
 typedef int32_t HRESULT;
+#endif
 
 #define SEVERITY_SUCCESS    0
 #define SEVERITY_ERROR      1
 
 
-#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #define SYSCALL_SUCCEEDED(x) (x!=-1)
 #define SYSCALL_FAILED(x)  (x == -1)
+
+
+#define FACILITY_ERRNO 0x800
+#define ERRNO_TO_HRESULT(err) MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ERRNO, err)
+#define ERRNOHR ERRNO_TO_HRESULT(ERRNO_TO_HRESULT(errno))
+
+#ifndef WIN32
+
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #define HRESULT_CODE(hr)    ((hr) & 0xFFFF)
 #define HRESULT_FACILITY(hr)  (((hr) >> 16) & 0x1fff)
 #define HRESULT_SEVERITY(hr)  (((hr) >> 31) & 0x1)
 #define MAKE_HRESULT(sev,fac,code) \
     ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )
-
-#define FACILITY_ERRNO 0x800
-#define ERRNO_TO_HRESULT(err) MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ERRNO, err)
-#define ERRNOHR ERRNO_TO_HRESULT(ERRNO_TO_HRESULT(errno))
-
 
 
 #define S_OK                             ((HRESULT)0)
@@ -57,6 +62,7 @@ typedef int32_t HRESULT;
 #define E_ACCESSDENIED                   ((HRESULT)(0x80070005L))
 #define E_PENDING                        ((HRESULT)(0x8000000AL))
 
+#endif
 
 
 

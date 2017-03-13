@@ -24,6 +24,7 @@
 
 const size_t DEFAULT_CONSOLE_WIDTH = 80;
 
+#ifndef WIN32
 static size_t GetConsoleWidthUnix()
 {
     // this ioctl call on file id 0 (stdin) works on MacOSX and Linux.  So it's probably universal
@@ -37,6 +38,7 @@ static size_t GetConsoleWidthUnix()
     }
     return retvalue;
 }
+#endif
 
 size_t GetConsoleWidth()
 {

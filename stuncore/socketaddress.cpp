@@ -317,7 +317,7 @@ HRESULT CSocketAddress::ToStringBuffer(char* pszAddrBytes, size_t length) const
         ChkA(E_FAIL);
     }
 
-    pszResult = ::inet_ntop(family, pAddrBytes, pszAddrBytes, length);
+    pszResult = ::inet_ntop(family, (void*)pAddrBytes, pszAddrBytes, length);
 
     ChkIf(pszResult == NULL, ERRNOHR);
 
