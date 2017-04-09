@@ -14,10 +14,24 @@
    limitations under the License.
 */
 
+#define BOOST_LOG_DYN_LINK 1
+
 #include "commonincludes.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+
+
+
 
 #include "stuncore.h"
 #include "server.h"
@@ -720,6 +734,41 @@ HRESULT StartTCP(CRefCountedPtr<CTCPServer>& spTCPServer, CStunServerConfig& con
 
 int main(int argc, char** argv)
 {
+    // //BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
+    // boost::log::add_file_log ( 
+    //     boost::log::keywords::file_name = "sample_%N.log", 
+    //     boost::log::keywords::rotation_size = 10 * 1024 * 1024 //10mb마다 rotate 
+    //     //boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate 
+    //     //boost::log::keywords::format = "[%TimeStamp%]: %Message%" 
+    // );
+
+    // boost::log::core::get()->set_filter
+    // (
+    //     boost::log::trivial::severity >= boost::log::trivial::trace
+    // );
+
+    // boost::log::add_common_attributes();
+
+    // //using namespace logging::trivial;
+    // boost::log::sources::severity_logger< boost::log::trivial::severity_level > lg;
+
+    // BOOST_LOG_SEV(lg, boost::log::trivial::trace) << "A trace severity message";
+    // BOOST_LOG_SEV(lg, boost::log::trivial::info) << "A debug severity message";
+    // BOOST_LOG_SEV(lg, boost::log::trivial::debug) << "A debug severity message";
+    // BOOST_LOG_SEV(lg, boost::log::trivial::warning) << "A debug severity message";
+    // BOOST_LOG_SEV(lg, boost::log::trivial::fatal) << "A debug severity message";
+
+    BLogging::SetLogLevel(3);
+
+    BLogging::LogMsg(0, "this is error test");
+
+    BLogging::LogMsg(1, "this is info test");
+
+    BLogging::LogMsg(2, "this is %drd %s", 3, "test");
+
+    BLogging::LogMsg(3, "%d is not %d, nor %d!!", 7, 3, 21);
+
+
     HRESULT hr = S_OK;
     StartupArgs args;
     std::vector<StartupArgs> argsVector;
