@@ -22,10 +22,10 @@
 
 
 
-// const uint32_t LL_ALWAYS = 0;      // only help messages, output the user expects to see, and critical error messages
-// const uint32_t LL_DEBUG = 1;    // messages helpful for debugging
-// const uint32_t LL_VERBOSE = 2;     // every packet
-// const uint32_t LL_VERBOSE_EXTREME = 3; // every packet and all the details
+const uint32_t TL_ERROR = 0;
+const uint32_t TL_INFO  = 1;
+const uint32_t TL_DEBUG = 2;
+const uint32_t TL_TRACE = 3;
 
 namespace TLogging
 {

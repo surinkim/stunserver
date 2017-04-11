@@ -722,41 +722,6 @@ HRESULT StartTCP(CRefCountedPtr<CTCPServer>& spTCPServer, CStunServerConfig& con
 
 int main(int argc, char** argv)
 {
-    // //BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
-    // boost::log::add_file_log ( 
-    //     boost::log::keywords::file_name = "sample_%N.log", 
-    //     boost::log::keywords::rotation_size = 10 * 1024 * 1024 //10mb마다 rotate 
-    //     //boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate 
-    //     //boost::log::keywords::format = "[%TimeStamp%]: %Message%" 
-    // );
-
-    // boost::log::core::get()->set_filter
-    // (
-    //     boost::log::trivial::severity >= boost::log::trivial::trace
-    // );
-
-    // boost::log::add_common_attributes();
-
-    // //using namespace logging::trivial;
-    // boost::log::sources::severity_logger< boost::log::trivial::severity_level > lg;
-
-    // BOOST_LOG_SEV(lg, boost::log::trivial::trace) << "A trace severity message";
-    // BOOST_LOG_SEV(lg, boost::log::trivial::info) << "A debug severity message";
-    // BOOST_LOG_SEV(lg, boost::log::trivial::debug) << "A debug severity message";
-    // BOOST_LOG_SEV(lg, boost::log::trivial::warning) << "A debug severity message";
-    // BOOST_LOG_SEV(lg, boost::log::trivial::fatal) << "A debug severity message";
-
-    TLogging::SetLogLevel(3);
-
-    TLogging::LogMsg(0, "this is error test");
-
-    TLogging::LogMsg(1, "this is info test");
-
-    TLogging::LogMsg(2, "this is %drd %s", 3, "test");
-
-    TLogging::LogMsg(3, "%d is not %d, nor %d!!", 7, 3, 21);
-
-
     HRESULT hr = S_OK;
     StartupArgs args;
     std::vector<StartupArgs> argsVector;
@@ -804,6 +769,9 @@ int main(int argc, char** argv)
         if (loglevel >= 0)
         {
             Logging::SetLogLevel((uint32_t)loglevel);
+
+            TLogging::SetLogLevel((uint32_t)loglevel);
+            TLogging::LogMsg(TL_INFO, "Set Log Level : %d", loglevel);
         }
     }
     
@@ -829,6 +797,7 @@ int main(int argc, char** argv)
             StartupArgs args = *itor;
             
             Logging::LogMsg(LL_DEBUG, "Starting server %d", serverindex);
+            TLogging::LogMsg(TL_INFO, "Starting server : index = %d", serverindex);
             serverindex++;
             
             ::DumpStartupArgs(args);

@@ -28,9 +28,15 @@
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/console.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 
+namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace expr = boost::log::expressions;
+namespace keywords = boost::log::keywords;
+namespace trivial = logging::trivial;
 
 namespace TLogging
 {
@@ -50,44 +56,54 @@ namespace TLogging
 
     void SetLogLevel(uint32_t level)
     {
-        //BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
-        boost::log::add_file_log ( 
-            boost::log::keywords::file_name = "sample_%N.log", 
-            boost::log::keywords::rotation_size = 10 * 1024 * 1024, //10mb마다 rotate 
-            //boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate 
-            //boost::log::keywords::format = "[%TimeStamp%]: %Message%" 
-            boost::log::keywords::format =
+        logging::add_file_log (
+            keywords::file_name = "sample_%N.log",
+            keywords::rotation_size = 10 * 1024 * 1024, //10mb마다 rotate
+            //keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate
+            //keywords::format = "[%TimeStamp%]: %Message%"
+            keywords::format =
             (
-                boost::log::expressions::stream
-                    << boost::log::expressions::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
-                    << ": <" << boost::log::trivial::severity
-                    << "> " << boost::log::expressions::smessage
+                expr::stream
+                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
+                    << ": <" << trivial::severity
+                    << "> " << expr::smessage
             )
 
         );
 
+        logging::add_console_log(
+            std::cout,
+            keywords::format =
+            (
+                expr::stream
+                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
+                    << ": <" << trivial::severity
+                    << "> " << expr::smessage
+            )
+        );
+
         if (level == 0)
         {
-            boost::log::core::get()->set_filter( boost::log::trivial::severity >= boost::log::trivial::error);
+            logging::core::get()->set_filter(trivial::severity >= trivial::error);
         }
         else if (level == 1)
         {
-            boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+            logging::core::get()->set_filter(trivial::severity >= trivial::info);
         }
         else if (level == 2)
         {
-            boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+            logging::core::get()->set_filter(trivial::severity >= trivial::debug);
         }
         else if (level == 3)
         {
-            boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
+            logging::core::get()->set_filter(trivial::severity >= trivial::trace);
         }
         else
         {
-            boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::error);
+            logging::core::get()->set_filter(trivial::severity >= trivial::error);
         }
 
-        boost::log::add_common_attributes();
+        logging::add_common_attributes();
         
         
        // s_loglevel = level;
@@ -96,10 +112,6 @@ namespace TLogging
 
     void LogMsg(uint32_t level, const char* pszFormat, ...)
     {
-
-        
-
-
         va_list args;
         va_start(args, pszFormat);
 
@@ -114,18 +126,27 @@ namespace TLogging
         char szBuf[1024] = {0, };
         vsprintf(szBuf, pszFormat, args);
 
-        boost::log::sources::severity_logger< boost::log::trivial::severity_level > lg;
+        src::severity_logger< trivial::severity_level > lg;
         if ( level == 0)
-            BOOST_LOG_SEV(lg, boost::log::trivial::error) << szBuf;
+        {
+            BOOST_LOG_SEV(lg, trivial::error) << szBuf;
+        }
         else if (level == 1)
-            BOOST_LOG_SEV(lg, boost::log::trivial::info) << szBuf;
+        {
+            BOOST_LOG_SEV(lg, trivial::info) << szBuf;
+        }
         else if (level == 2)
-            BOOST_LOG_SEV(lg, boost::log::trivial::debug) << szBuf;
+        {
+            BOOST_LOG_SEV(lg, trivial::debug) << szBuf;
+        }
         else if (level == 3)
-            BOOST_LOG_SEV(lg, boost::log::trivial::trace) << szBuf;
+        {
+            BOOST_LOG_SEV(lg, trivial::trace) << szBuf;
+        }
         else
-            BOOST_LOG_SEV(lg, boost::log::trivial::error) << szBuf;
-
+        {
+            BOOST_LOG_SEV(lg, trivial::error) << szBuf;
+        }
 
         va_end(args);
     }
