@@ -21,18 +21,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-
-
-
-
 #include "stuncore.h"
 #include "server.h"
 #include "tcpserver.h"
@@ -758,15 +746,15 @@ int main(int argc, char** argv)
     // BOOST_LOG_SEV(lg, boost::log::trivial::warning) << "A debug severity message";
     // BOOST_LOG_SEV(lg, boost::log::trivial::fatal) << "A debug severity message";
 
-    BLogging::SetLogLevel(3);
+    TLogging::SetLogLevel(3);
 
-    BLogging::LogMsg(0, "this is error test");
+    TLogging::LogMsg(0, "this is error test");
 
-    BLogging::LogMsg(1, "this is info test");
+    TLogging::LogMsg(1, "this is info test");
 
-    BLogging::LogMsg(2, "this is %drd %s", 3, "test");
+    TLogging::LogMsg(2, "this is %drd %s", 3, "test");
 
-    BLogging::LogMsg(3, "%d is not %d, nor %d!!", 7, 3, 21);
+    TLogging::LogMsg(3, "%d is not %d, nor %d!!", 7, 3, 21);
 
 
     HRESULT hr = S_OK;

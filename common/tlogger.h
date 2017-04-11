@@ -17,8 +17,8 @@
 // Add implementation logger with boost::log
 // hyunuk kim (nnhope@hotmail.com)
 
-#ifndef BLOGGING_H
-#define BLOGGING_H
+#ifndef TLOGGING_H
+#define TLOGGING_H
 
 
 
@@ -27,7 +27,7 @@
 // const uint32_t LL_VERBOSE = 2;     // every packet
 // const uint32_t LL_VERBOSE_EXTREME = 3; // every packet and all the details
 
-namespace BLogging
+namespace TLogging
 {
     uint32_t GetLogLevel();
     void SetLogLevel(uint32_t level);

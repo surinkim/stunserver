@@ -138,7 +138,7 @@ inline void cta_noop(const char* psz)
 
 
 #include "logger.h"
-#include "blogger.h"
+#include "tlogger.h"
 
 
 

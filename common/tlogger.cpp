@@ -18,7 +18,7 @@
 
 #include "commonincludes.hpp"
 
-#include "blogger.h"
+#include "tlogger.h"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/log/support/date_time.hpp>
@@ -32,7 +32,7 @@
 #include <boost/log/sources/record_ostream.hpp>
 
 
-namespace BLogging
+namespace TLogging
 {
     //static uint32_t s_loglevel = LL_ALWAYS; // error and usage messages only
 

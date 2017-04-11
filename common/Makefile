@@ -1,7 +1,7 @@
 include ../common.inc
 
 PROJECT_TARGET := libcommon.a
-PROJECT_SRCS := atomichelpers.cpp cmdlineparser.cpp common.cpp fasthash.cpp getconsolewidth.cpp getmillisecondcounter.cpp logger.cpp prettyprint.cpp refcountobject.cpp stringhelper.cpp blogger.cpp
+PROJECT_SRCS := atomichelpers.cpp cmdlineparser.cpp common.cpp fasthash.cpp getconsolewidth.cpp getmillisecondcounter.cpp logger.cpp prettyprint.cpp refcountobject.cpp stringhelper.cpp tlogger.cpp
 PROJECT_OBJS := $(subst .cpp,.o,$(PROJECT_SRCS))
 INCLUDES := $(BOOST_INCLUDE)
 LIBS := -lboost_thread -lboost_log -lboost_system
