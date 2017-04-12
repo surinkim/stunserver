@@ -291,7 +291,7 @@ void CStunSocketThread::Run()
     sendsocketcount += (int)(_tsa.set[RoleAP].fValid);
     sendsocketcount += (int)(_tsa.set[RoleAA].fValid);
 
-    Logging::LogMsg(LL_DEBUG, "Starting listener thread (%d recv sockets, %d send sockets)", _socks.size(), sendsocketcount);
+    TLogging::LogMsg(TL_INFO, "Starting listener thread (%d recv sockets, %d send sockets)", _socks.size(), sendsocketcount);
 
     while (_fNeedToExit == false)
     {
@@ -339,13 +339,13 @@ void CStunSocketThread::Run()
             szIPLocal[0] = '\0';
         }
         
-        Logging::LogMsg(LL_VERBOSE, "recvfrom returns %d from %s on local interface %s", ret, szIPRemote, szIPLocal);
+        TLogging::LogMsg(TL_INFO, "recvfrom returns %d from %s on local interface %s", ret, szIPRemote, szIPLocal);
 
         allowed_to_pass = (_spLimiter.get() != NULL) ? _spLimiter->RateCheck(_msgIn.addrRemote) : true;
         
         if (allowed_to_pass == false)
         {
-            Logging::LogMsg(LL_VERBOSE, "RateLimiter signals false for packet from %s", szIPRemote);
+            TLogging::LogMsg(TL_INFO, "RateLimiter signals false for packet from %s", szIPRemote);
         }
 
         if ((ret < 0) || (allowed_to_pass == false))
@@ -370,7 +370,7 @@ void CStunSocketThread::Run()
         ProcessRequestAndSendResponse();
     }
 
-    Logging::LogMsg(LL_DEBUG, "Thread exiting");
+    TLogging::LogMsg(TL_INFO, "Thread exiting");
 }
 
                         
@@ -402,9 +402,9 @@ HRESULT CStunSocketThread::ProcessRequestAndSendResponse()
     sendret = ::sendto(sockout, _spBufferOut->GetData(), _spBufferOut->GetSize(), 0, _msgOut.addrDest.GetSockAddr(), _msgOut.addrDest.GetSockAddrLength());
     
     
-    if (Logging::GetLogLevel() >= LL_VERBOSE)
+    //if (TLogging::GetLogLevel() >= LL_VERBOSE)
     {
-        Logging::LogMsg(LL_VERBOSE, "sendto returns %d (err == %d)\n", sendret, errno);
+        TLogging::LogMsg(TL_INFO, "sendto returns %d (err == %d)\n", sendret, errno);
     }
 
         

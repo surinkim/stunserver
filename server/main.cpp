@@ -91,13 +91,13 @@ void LogHR(uint16_t level, HRESULT hr)
 
         if (pMsg)
         {
-            Logging::LogMsg(level, "Error: %s", pMsg);
+            TLogging::LogMsg(level, "Error: %s", pMsg);
             fGotMsg = true;
         }
         
         if (err == EADDRINUSE)
         {
-            Logging::LogMsg(level, 
+            TLogging::LogMsg(level,
                 "This error likely means another application is listening on one\n"
                 "or more of the same ports you are attempting to configure this\n"
                 "server to listen on.  Run \"netstat -a -p -t -u\" to see a list\n"
@@ -108,7 +108,7 @@ void LogHR(uint16_t level, HRESULT hr)
     
     if (fGotMsg == false)
     {
-        Logging::LogMsg(level, "Error: %x", hr);
+        TLogging::LogMsg(level, "Error: %x", hr);
     }
 }
 
@@ -138,7 +138,7 @@ struct StartupArgs
 
 void DumpStartupArgs(StartupArgs& args)
 {
-    Logging::LogMsg(LL_DEBUG, "\n\n--------------------------");
+    TLogging::LogMsg(TL_INFO, "\n\n--------------------------");
     PRINTARG(strMode);
     PRINTARG(strPrimaryInterface);
     PRINTARG(strAltInterface);
@@ -153,7 +153,7 @@ void DumpStartupArgs(StartupArgs& args)
     PRINTARG(strMaxConnections);
     PRINTARG(strDosProtect);
     PRINTARG(strReuseAddr);
-    Logging::LogMsg(LL_DEBUG, "--------------------------\n");
+    TLogging::LogMsg(TL_INFO, "--------------------------\n");
 }
 
 
@@ -166,40 +166,40 @@ void DumpConfig(CStunServerConfig &config)
     if (config.fHasPP)
     {
         config.addrPP.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "PP = %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "PP = %s", strSocket.c_str());
     }
     if (config.fHasPA)
     {
         config.addrPA.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "PA = %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "PA = %s", strSocket.c_str());
     }
     if (config.fHasAP)
     {
         config.addrAP.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "AP = %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "AP = %s", strSocket.c_str());
     }
     if (config.fHasAA)
     {
         config.addrAA.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "AA = %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "AA = %s", strSocket.c_str());
     }
     
     if (config.addrPrimaryAdvertised.IsIPAddressZero() == false)
     {
         config.addrPrimaryAdvertised.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "Primary IP will be advertised as %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "Primary IP will be advertised as %s", strSocket.c_str());
     }
     
     if (config.addrAlternateAdvertised.IsIPAddressZero() == false)
     {
         config.addrAlternateAdvertised.ToString(&strSocket);
-        Logging::LogMsg(LL_DEBUG, "Alternate IP will be advertised as %s", strSocket.c_str());
+        TLogging::LogMsg(TL_INFO, "Alternate IP will be advertised as %s", strSocket.c_str());
     }
     
-    Logging::LogMsg(LL_DEBUG, "Protocol = %s", config.fTCP ? "TCP" : "UDP");
+    TLogging::LogMsg(TL_INFO, "Protocol = %s", config.fTCP ? "TCP" : "UDP");
     if (config.fTCP && (config.nMaxConnections>0))
     {
-        Logging::LogMsg(LL_DEBUG, "Max TCP Connections per thread: %d", config.nMaxConnections);
+        TLogging::LogMsg(TL_INFO, "Max TCP Connections per thread: %d", config.nMaxConnections);
     }
 }
 
@@ -278,6 +278,8 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
 
     StringHelper::ToLower(args.strProtocol);
     StringHelper::Trim(args.strProtocol);
+
+    StringHelper::Trim(args.strVerbosity);
     
     StringHelper::Trim(args.strPrimaryAdvertised);
     StringHelper::Trim(args.strAlternateAdvertised);
@@ -297,7 +299,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         }
         else
         {
-            Logging::LogMsg(LL_ALWAYS, "Mode must be \"full\" or \"basic\".");
+            TLogging::LogMsg(TL_ERROR, "Mode must be \"full\" or \"basic\".");
             Chk(E_INVALIDARG);
         }
     }
@@ -317,7 +319,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         }
         else
         {
-            Logging::LogMsg(LL_ALWAYS, "Family argument must be '4' or '6'");
+            TLogging::LogMsg(TL_ERROR, "Family argument must be '4' or '6'");
             Chk(E_INVALIDARG);
         }
     }
@@ -327,13 +329,12 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
     {
         if ((args.strProtocol != "udp") && (args.strProtocol != "tcp"))
         {
-            Logging::LogMsg(LL_ALWAYS, "Protocol argument must be 'udp' or 'tcp'. 'tls' is not supported yet");
+            TLogging::LogMsg(TL_ERROR, "Protocol argument must be 'udp' or 'tcp'. 'tls' is not supported yet");
             Chk(E_INVALIDARG);
         }
         
         config.fTCP = (args.strProtocol == "tcp");
     }
-    
     
     // ---- MAX Connections -----------------------------------------------------
     nMaxConnections = 0;
@@ -341,14 +342,14 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
     {
         if (config.fTCP == false)
         {
-            Logging::LogMsg(LL_ALWAYS, "Max connections parameter has no meaning in UDP mode. Did you mean to specify \"--protocol=tcp ?\"");
+            TLogging::LogMsg(TL_ERROR, "Max connections parameter has no meaning in UDP mode. Did you mean to specify \"--protocol=tcp ?\"");
         }
         else
         {
             hr = StringHelper::ValidateNumberString(args.strMaxConnections.c_str(), 1, 100000, &nMaxConnections);
             if (FAILED(hr))
             {
-                Logging::LogMsg(LL_ALWAYS, "Max connections must be between 1-100000");
+                TLogging::LogMsg(TL_ERROR, "Max connections must be between 1-100000");
                 Chk(hr);
             }
         }
@@ -363,7 +364,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         hr = StringHelper::ValidateNumberString(args.strPrimaryPort.c_str(), 0x0001, 0xffff, &nPrimaryPort);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Primary port value is invalid.  Value must be between 1-65535");
+            TLogging::LogMsg(TL_ERROR, "Primary port value is invalid.  Value must be between 1-65535");
             Chk(hr);
         }
     }
@@ -375,14 +376,14 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         hr = StringHelper::ValidateNumberString(args.strAltPort.c_str(), 0x0001, 0xffff, &nAltPort);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Alt port value is invalid.  Value must be between 1-65535");
+            TLogging::LogMsg(TL_ERROR, "Alt port value is invalid.  Value must be between 1-65535");
             Chk(hr);
         }
     }
 
     if (nPrimaryPort == nAltPort)
     {
-        Logging::LogMsg(LL_ALWAYS, "Primary port and alternate port must be different values");
+        TLogging::LogMsg(TL_ERROR, "Primary port and alternate port must be different values");
         Chk(E_INVALIDARG);
     }
 
@@ -418,7 +419,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
             hr = GetSocketAddressForAdapter(family, args.strPrimaryInterface.c_str(), port, &addr);
             if (FAILED(hr))
             {
-                Logging::LogMsg(LL_ALWAYS, "No matching primary adapter found for %s", args.strPrimaryInterface.c_str());
+                TLogging::LogMsg(TL_ERROR, "No matching primary adapter found for %s", args.strPrimaryInterface.c_str());
                 Chk(hr);
             }
             config.addrPP = addr;
@@ -436,27 +437,27 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         // so if one isn't specified, it's best guess - just avoid duplicates
         if (fHasAtLeastTwoAdapters == false)
         {
-            Logging::LogMsg(LL_ALWAYS, "There does not appear to be two or more unique IP addresses to run in full mode");
+            TLogging::LogMsg(TL_ERROR, "There does not appear to be two or more unique IP addresses to run in full mode");
             Chk(E_UNEXPECTED);
         }
 
         hr = ResolveAdapterName(true, family, args.strPrimaryInterface, 0, &addrPrimary);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Can't find address for primary interface");
+            TLogging::LogMsg(TL_ERROR, "Can't find address for primary interface");
             Chk(hr);
         }
 
         hr = ResolveAdapterName(false, family, args.strAltInterface, 0, &addrAlternate);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Can't find address for alternate interface");
+            TLogging::LogMsg(TL_ERROR, "Can't find address for alternate interface");
             Chk(hr);
         }
 
         if  (addrPrimary.IsSameIP(addrAlternate))
         {
-            Logging::LogMsg(LL_ALWAYS, "Error - Primary interface and Alternate Interface appear to have the same IP address. Full mode requires two IP addresses that are unique");
+            TLogging::LogMsg(TL_ERROR, "Error - Primary interface and Alternate Interface appear to have the same IP address. Full mode requires two IP addresses that are unique");
             Chk(E_INVALIDARG);
         }
         
@@ -488,7 +489,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
         hr = ::NumericIPToAddress(family, pszPrimaryAdvertised, &config.addrPrimaryAdvertised);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Error with --primaryadvertised. %s is not a valid IP address string", pszPrimaryAdvertised);
+            TLogging::LogMsg(TL_ERROR, "Error with --primaryadvertised. %s is not a valid IP address string", pszPrimaryAdvertised);
             Chk(hr);
         }
     }
@@ -497,14 +498,14 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
     {
         if (mode != Full)
         {
-            Logging::LogMsg(LL_ALWAYS, "Error. --altadvertised was specified, but --mode param was not set to FULL.");
+            TLogging::LogMsg(TL_ERROR, "Error. --altadvertised was specified, but --mode param was not set to FULL.");
             ChkIf(config.fHasAA, E_INVALIDARG);
         }
         
         hr = ::NumericIPToAddress(family, pszAltAdvertised, &config.addrAlternateAdvertised);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Error with --altadvertised. %s is not a valid IP address string", pszAltAdvertised);
+            TLogging::LogMsg(TL_ERROR, "Error with --altadvertised. %s is not a valid IP address string", pszAltAdvertised);
             Chk(hr);
         }
     }
@@ -606,13 +607,13 @@ HRESULT LoadConfigsFromFile(const std::string& filename, std::vector<StartupArgs
     }
     catch(ptree_error ex1)
     {
-        Logging::LogMsg(LL_ALWAYS, "Error processing configuration file: %s", ex1.what());
+        TLogging::LogMsg(TL_ERROR, "Error processing configuration file: %s", ex1.what());
         error = true;
     }
     
     if (!error && configurations.size() == 0)
     {
-        Logging::LogMsg(LL_ALWAYS, "File is valid json, but no configurations found");
+        TLogging::LogMsg(TL_ERROR, "File is valid json, but no configurations found");
         error = true;
     }
     
@@ -643,7 +644,7 @@ HRESULT BlockSignal(int sig)
     if (result != 0)
     {
         hr = ERRNO_TO_HRESULT(result);
-        Logging::LogMsg(LL_DEBUG, "BlockSignal: x%x", hr);
+        TLogging::LogMsg(TL_INFO, "BlockSignal: x%x", hr);
     }
     
     return hr;
@@ -663,7 +664,7 @@ void WaitForAppExitSignal()
         int sig = 0;
         
         int ret = sigwait(&sigs, &sig);
-        Logging::LogMsg(LL_DEBUG, "sigwait returns %d (errno==%d)", ret, (ret==-1)?0:errno);
+        TLogging::LogMsg(TL_INFO, "sigwait returns %d (errno==%d)", ret, (ret==-1)?0:errno);
         if ((sig == SIGINT) || (sig == SIGTERM))
         {
             break;
@@ -680,16 +681,16 @@ HRESULT StartUDP(CRefCountedPtr<CStunServer>& spServer, CStunServerConfig& confi
     hr = CStunServer::CreateInstance(config, spServer.GetPointerPointer());
     if (FAILED(hr))
     {
-        Logging::LogMsg(LL_ALWAYS, "Unable to initialize UDP server (error code = x%x)", hr);
-        LogHR(LL_ALWAYS, hr);
+        TLogging::LogMsg(TL_ERROR, "Unable to initialize UDP server (error code = x%x)", hr);
+        LogHR(TL_ERROR, hr);
         return hr;
     }
 
     hr = spServer->Start();
     if (FAILED(hr))
     {
-        Logging::LogMsg(LL_ALWAYS, "Unable to start UDP server (error code = x%x)", hr);
-        LogHR(LL_ALWAYS, hr);
+        TLogging::LogMsg(TL_ERROR, "Unable to start UDP server (error code = x%x)", hr);
+        LogHR(TL_ERROR, hr);
         return hr;
     }
     
@@ -703,16 +704,16 @@ HRESULT StartTCP(CRefCountedPtr<CTCPServer>& spTCPServer, CStunServerConfig& con
     hr = CTCPServer::CreateInstance(config, spTCPServer.GetPointerPointer());
     if (FAILED(hr))
     {
-        Logging::LogMsg(LL_ALWAYS, "Unable to initialize TCP server (error code = x%x)", hr);
-        LogHR(LL_ALWAYS, hr);
+        TLogging::LogMsg(TL_ERROR, "Unable to initialize TCP server (error code = x%x)", hr);
+        LogHR(TL_ERROR, hr);
         return hr;
     }
     
     hr = spTCPServer->Start();
     if (FAILED(hr))
     {
-        Logging::LogMsg(LL_ALWAYS, "Unable to start TCP server (error code = x%x)", hr);
-        LogHR(LL_ALWAYS, hr);
+        TLogging::LogMsg(TL_ERROR, "Unable to start TCP server (error code = x%x)", hr);
+        LogHR(TL_ERROR, hr);
         return hr;
     }
     
@@ -743,9 +744,9 @@ int main(int argc, char** argv)
     
 
 #ifdef DEBUG
-    Logging::SetLogLevel(LL_DEBUG);
+    Logging::SetLogLevel(TL_DEBUG);
 #else
-    Logging::SetLogLevel(LL_ALWAYS);
+    Logging::SetLogLevel(TL_INFO);
 #endif
 
 
@@ -779,7 +780,7 @@ int main(int argc, char** argv)
         hr = LoadConfigsFromFile(args.strConfigFile, argsVector);
         if (FAILED(hr))
         {
-            Logging::LogMsg(LL_ALWAYS, "Can't process configuration file");
+            TLogging::LogMsg(TL_ERROR, "Can't process configuration file");
             return -3;
         }
     }
@@ -805,7 +806,7 @@ int main(int argc, char** argv)
             hr = BuildServerConfigurationFromArgs(args, &config);
             if (FAILED(hr))
             {
-                Logging::LogMsg(LL_ALWAYS, "Error building configuration from options given");
+                TLogging::LogMsg(TL_ERROR, "Error building configuration from options given");
                 break;
             }
             DumpConfig(config);
@@ -840,24 +841,24 @@ int main(int argc, char** argv)
 
     if (SUCCEEDED(hr))
     {
-        Logging::LogMsg(LL_DEBUG, "Successfully started server.");
+        TLogging::LogMsg(TL_INFO, "Successfully started server.");
         WaitForAppExitSignal();
     }
 
 
-    Logging::LogMsg(LL_DEBUG, "Server is exiting");
+    TLogging::LogMsg(TL_INFO, "Server is exiting");
     
     
     for (std::vector<UdpServerPtr>::iterator itor = udpServers.begin(); itor != udpServers.end(); itor++)
     {
-        Logging::LogMsg(LL_DEBUG, "Shutting down UDP server");
+        TLogging::LogMsg(TL_INFO, "Shutting down UDP server");
         UdpServerPtr server = *itor;
         server->Stop();
     }
     
     for (std::vector<TcpServerPtr>::iterator itor = tcpServers.begin(); itor != tcpServers.end(); itor++)
     {
-        Logging::LogMsg(LL_DEBUG, "Shutting down TCP server");
+        TLogging::LogMsg(TL_INFO, "Shutting down TCP server");
         TcpServerPtr server = *itor;
         server->Stop();
     }

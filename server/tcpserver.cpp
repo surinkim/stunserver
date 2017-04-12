@@ -363,7 +363,7 @@ void CTCPStunThread::Run()
 {
     HRESULT hrPoll;
     
-    Logging::LogMsg(LL_DEBUG, "Starting TCP listening thread (%d sockets)\n", _countSocks);
+    TLogging::LogMsg(TL_INFO, "Starting TCP listening thread (%d sockets)\n", _countSocks);
     
     _timeLastSweep = time(NULL);
     
@@ -390,9 +390,9 @@ void CTCPStunThread::Run()
         
         if (hrPoll == S_OK)
         {
-            if (Logging::GetLogLevel() >= LL_VERBOSE)
+            //if (Logging::GetLogLevel() >= TL_INFO)
             {
-                Logging::LogMsg(LL_VERBOSE, "socket %d: %x (%s%s%s%s%s%s)", pollevent.fd, pollevent.eventflags,
+                TLogging::LogMsg(TL_INFO, "socket %d: %x (%s%s%s%s%s%s)", pollevent.fd, pollevent.eventflags,
                     (pollevent.eventflags&IPOLLING_READ) ? " IPOLLING_READ " : "",
                     (pollevent.eventflags&IPOLLING_WRITE) ? " IPOLLING_WRITE " : "",
                     (pollevent.eventflags&IPOLLING_RDHUP) ? " IPOLLING_RDHUP " : "",
@@ -424,7 +424,7 @@ void CTCPStunThread::Run()
     
     ThreadCleanup();
     
-    Logging::LogMsg(LL_DEBUG, "TCP Thread exiting");
+    TLogging::LogMsg(TL_INFO, "TCP Thread exiting");
 }
 
 void CTCPStunThread::ProcessConnectionEvent(int sock, uint32_t eventflags)
@@ -440,7 +440,7 @@ void CTCPStunThread::ProcessConnectionEvent(int sock, uint32_t eventflags)
     
     if ((ppConn == NULL) || (*ppConn == NULL))
     {
-        Logging::LogMsg(LL_DEBUG, "Warning - ProcessConnectionEvent could not resolve socket into connection (socket == %d)", sock);
+        TLogging::LogMsg(TL_INFO, "Warning - ProcessConnectionEvent could not resolve socket into connection (socket == %d)", sock);
         return;
     }
     
@@ -469,11 +469,11 @@ bool CTCPStunThread::RateCheck(const CSocketAddress& addr)
         
         if (result == false)
         {
-            if (Logging::GetLogLevel() >= LL_VERBOSE)
+            if (Logging::GetLogLevel() >= TL_INFO)
             {
                 char szIP[100];
                 addr.ToStringBuffer(szIP, 100);
-                Logging::LogMsg(LL_VERBOSE, "Rate Limiter has blocked incoming connection from IP %s", szIP);
+                TLogging::LogMsg(TL_INFO, "Rate Limiter has blocked incoming connection from IP %s", szIP);
             }
         }
     }
@@ -501,7 +501,7 @@ StunConnection* CTCPStunThread::AcceptConnection(CStunSocket* pListenSocket)
     socktmp = ::accept(listensock, (sockaddr*)&addrClient, &socklen);
 
     err = errno;
-    Logging::LogMsg(LL_VERBOSE, "accept returns %d (errno == %d)", socktmp, (socktmp<0)?err:0);
+    TLogging::LogMsg(TL_INFO, "accept returns %d (errno == %d)", socktmp, (socktmp<0)?err:0);
     ChkIfA(socktmp == -1, E_FAIL);
     
     // --- rate limit check-------
@@ -527,13 +527,13 @@ StunConnection* CTCPStunThread::AcceptConnection(CStunSocket* pListenSocket)
     // out of space in the lookup tables?
     ChkIfA(insertresult == -1, E_FAIL);
     
-    if (Logging::GetLogLevel() >= LL_VERBOSE)
+    if (Logging::GetLogLevel() >= TL_INFO)
     {
         char szIPRemote[100];
         char szIPLocal[100];
         pConn->_stunsocket.GetLocalAddress().ToStringBuffer(szIPLocal, ARRAYSIZE(szIPLocal));
         pConn->_stunsocket.GetRemoteAddress().ToStringBuffer(szIPRemote, ARRAYSIZE(szIPRemote));
-        Logging::LogMsg(LL_VERBOSE, "accepting new connection on socket %d from %s on interface %s", pConn->_stunsocket.GetSocketHandle(), szIPRemote, szIPLocal);
+        TLogging::LogMsg(TL_INFO, "accepting new connection on socket %d from %s on interface %s", pConn->_stunsocket.GetSocketHandle(), szIPRemote, szIPLocal);
     }
     
     
@@ -577,7 +577,7 @@ HRESULT CTCPStunThread::ReceiveBytesForConnection(StunConnection* pConn)
         bytesread = recv(sock, buffer, bytesneeded, 0);
         
         err = errno;
-        Logging::LogMsg(LL_VERBOSE, "recv on socket %d returns %d (errno=%d)", sock, bytesread, (bytesread<0)?err:0);
+        TLogging::LogMsg(TL_INFO, "recv on socket %d returns %d (errno=%d)", sock, bytesread, (bytesread<0)?err:0);
         
         
         if ((bytesread < 0) && ((err == EWOULDBLOCK) || (err==EAGAIN)) )
@@ -674,7 +674,7 @@ HRESULT CTCPStunThread::WriteBytesForConnection(StunConnection* pConn)
         // Can't send any more bytes, come back again later
         ChkIf( ((sent == -1) && ((errno == EAGAIN) || (errno == EWOULDBLOCK))), S_OK);
         
-        Logging::LogMsg(LL_VERBOSE, "send on socket %d returns %d (errno=%d)", sock, sent, (sent<0)?err:0);
+        TLogging::LogMsg(TL_INFO, "send on socket %d returns %d (errno=%d)", sock, sent, (sent<0)?err:0);
 
         // general connection error
         ChkIf(sent == -1, E_FAIL);
@@ -716,7 +716,7 @@ void CTCPStunThread::CloseConnection(StunConnection* pConn)
     {
         int sock = pConn->_stunsocket.GetSocketHandle();
         
-        Logging::LogMsg(LL_VERBOSE, "Closing socket %d\n", sock);
+        TLogging::LogMsg(TL_INFO, "Closing socket %d\n", sock);
         
         _spPolling->Remove(pConn->_stunsocket.GetSocketHandle());
         pConn->_stunsocket.Close();
@@ -761,7 +761,7 @@ void CTCPStunThread::SweepDeadConnections()
     {
         if  (_pOldConnList->Size())
         {
-            Logging::LogMsg(LL_VERBOSE, "SweepDeadConnections closing %d connections", _pOldConnList->Size());
+            TLogging::LogMsg(TL_INFO, "SweepDeadConnections closing %d connections", _pOldConnList->Size());
         }
         
         CloseAllConnections(_pOldConnList);
@@ -798,7 +798,7 @@ CTCPServer::CTCPServer()
 
 CTCPServer::~CTCPServer()
 {
-    Logging::LogMsg(LL_DEBUG, "~CTCPServer() - exiting");
+    TLogging::LogMsg(TL_INFO, "~CTCPServer() - exiting");
     Stop();
 }
 

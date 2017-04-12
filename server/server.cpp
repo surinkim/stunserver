@@ -137,14 +137,14 @@ HRESULT CStunServer::Initialize(const CStunServerConfig& config)
 
     if (config.fEnableDosProtection)
     {
-        Logging::LogMsg(LL_DEBUG, "Creating rate limiter for ddos protection\n");
+        TLogging::LogMsg(TL_INFO, "Creating rate limiter for ddos protection\n");
         // hard coding to 25000 ip addresses
         spLimiter = boost::shared_ptr<RateLimiter>(new RateLimiter(25000, config.fMultiThreadedMode));
     }
 
     if (config.fMultiThreadedMode == false)
     {
-        Logging::LogMsg(LL_DEBUG, "Configuring single threaded mode\n");
+        TLogging::LogMsg(TL_INFO, "Configuring single threaded mode\n");
         
         // create one thread for all the sockets
         CStunSocketThread* pThread = new CStunSocketThread();
@@ -156,7 +156,7 @@ HRESULT CStunServer::Initialize(const CStunServerConfig& config)
     }
     else
     {
-        Logging::LogMsg(LL_DEBUG, "Configuring multi-threaded mode\n");
+        TLogging::LogMsg(TL_INFO, "Configuring multi-threaded mode\n");
 
         // one thread for every socket
         CStunSocketThread* pThread = NULL;
