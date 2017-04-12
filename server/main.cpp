@@ -134,7 +134,7 @@ struct StartupArgs
     
 };
 
-#define PRINTARG(member) Logging::LogMsg(LL_DEBUG, "%s = %s", #member, args.member.length() ? args.member.c_str() : "<empty>");
+#define PRINTARG(member) TLogging::LogMsg(TL_INFO, "%s = %s", #member, args.member.length() ? args.member.c_str() : "<empty>");
 
 void DumpStartupArgs(StartupArgs& args)
 {
@@ -771,7 +771,6 @@ int main(int argc, char** argv)
             Logging::SetLogLevel((uint32_t)loglevel);
 
             TLogging::SetLogLevel((uint32_t)loglevel);
-            TLogging::LogMsg(TL_INFO, "Set Log Level : %d", loglevel);
         }
     }
     
@@ -796,11 +795,13 @@ int main(int argc, char** argv)
             CStunServerConfig config;
             StartupArgs args = *itor;
             
-            Logging::LogMsg(LL_DEBUG, "Starting server %d", serverindex);
-            TLogging::LogMsg(TL_INFO, "Starting server : index = %d", serverindex);
+            TLogging::LogMsg(TL_INFO, "Starting server = index %d", serverindex);
             serverindex++;
+
+            TLogging::LogMsg(TL_INFO, "Current Log Level = %d (0:ERROR, 1:INFO, 2:DEBUG, 3:TRACE)", TLogging::GetLogLevel());
             
             ::DumpStartupArgs(args);
+
             hr = BuildServerConfigurationFromArgs(args, &config);
             if (FAILED(hr))
             {

@@ -37,10 +37,11 @@ namespace src = boost::log::sources;
 namespace expr = boost::log::expressions;
 namespace keywords = boost::log::keywords;
 namespace trivial = logging::trivial;
+namespace sinks = logging::sinks;
 
 namespace TLogging
 {
-    //static uint32_t s_loglevel = LL_ALWAYS; // error and usage messages only
+    static uint32_t s_loglevel = TL_INFO;
 
     void VPrintMsg(const char* pszFormat, va_list& args)
     {
@@ -50,35 +51,33 @@ namespace TLogging
 
     uint32_t GetLogLevel()
     {
-        //return s_loglevel;
-        return 0;
+        return s_loglevel;
     }
 
     void SetLogLevel(uint32_t level)
     {
         logging::add_file_log (
-            keywords::file_name = "sample_%N.log",
-            keywords::rotation_size = 10 * 1024 * 1024, //10mb마다 rotate
-            //keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), //12시마다 rotate
-            //keywords::format = "[%TimeStamp%]: %Message%"
+            keywords::file_name = "./logs/stunserver_%Y-%m-%d_%N.log",
+            keywords::rotation_size = 10 * 1024 * 1024, //Rotate every 10MB
+            keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), //Rotate every day
             keywords::format =
             (
                 expr::stream
-                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
-                    << ": <" << trivial::severity
-                    << "> " << expr::smessage
+                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "[%Y-%m-%d %H:%M:%S.%f]")
+                    << " [" << trivial::severity
+                    << "] " << expr::smessage
             )
 
-        );
+        )->locked_backend()->set_file_collector(sinks::file::make_collector(keywords::target = "logs", keywords::max_size = 1024 * 1024 * 1024));
 
         logging::add_console_log(
             std::cout,
             keywords::format =
             (
                 expr::stream
-                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
-                    << ": <" << trivial::severity
-                    << "> " << expr::smessage
+                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "[%Y-%m-%d %H:%M:%S.%f]")
+                    << " [" << trivial::severity
+                    << "] " << expr::smessage
             )
         );
 
@@ -100,13 +99,13 @@ namespace TLogging
         }
         else
         {
-            logging::core::get()->set_filter(trivial::severity >= trivial::error);
+            logging::core::get()->set_filter(trivial::severity >= trivial::info);
         }
 
         logging::add_common_attributes();
         
         
-       // s_loglevel = level;
+        s_loglevel = level;
     }
 
 
