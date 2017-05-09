@@ -57,7 +57,7 @@ namespace TLogging
     void SetLogLevel(uint32_t level)
     {
         logging::add_file_log (
-            keywords::file_name = "./logs/stunserver_%Y-%m-%d_%N.log",
+            keywords::file_name = "/var/log/stunserver/stunserver_%Y-%m-%d_%N.log",
             keywords::auto_flush = true,
             keywords::rotation_size = 10 * 1024 * 1024, //Rotate every 10MB
             keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), //Rotate every day
