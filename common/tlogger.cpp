@@ -58,6 +58,7 @@ namespace TLogging
     {
         logging::add_file_log (
             keywords::file_name = "./logs/stunserver_%Y-%m-%d_%N.log",
+            keywords::auto_flush = true,
             keywords::rotation_size = 10 * 1024 * 1024, //Rotate every 10MB
             keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), //Rotate every day
             keywords::format =
@@ -67,19 +68,20 @@ namespace TLogging
                     << " [" << trivial::severity
                     << "] " << expr::smessage
             )
+          );
 
-        )->locked_backend()->set_file_collector(sinks::file::make_collector(keywords::target = "logs", keywords::max_size = 1024 * 1024 * 1024));
+//        )->locked_backend()->set_file_collector(sinks::file::make_collector(keywords::target = "logs", keywords::max_size = 1024 * 1024 * 1024));
 
-        logging::add_console_log(
-            std::cout,
-            keywords::format =
-            (
-                expr::stream
-                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "[%Y-%m-%d %H:%M:%S.%f]")
-                    << " [" << trivial::severity
-                    << "] " << expr::smessage
-            )
-        );
+//        logging::add_console_log(
+//            std::cout,
+//            keywords::format =
+//            (
+//                expr::stream
+//                    << expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "[%Y-%m-%d %H:%M:%S.%f]")
+//                    << " [" << trivial::severity
+//                    << "] " << expr::smessage
+//            )
+//        );
 
         if (level == 0)
         {
